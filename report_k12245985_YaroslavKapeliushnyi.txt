@@ -1,0 +1,29 @@
+Yaroslav Kapeliushnyi k12245985 Report – LUD Challenge 2025
+
+Objective
+Maximise personalised ranking quality (nDCG@10) on the user‑item interaction data.
+
+Methods Evaluated
+1. Popularity baselines  
+   • Global TopPop – nDCG 0.008  
+   • Country‑TopPop – nDCG 0.018  
+   • Gender‑TopPop – nDCG 0.011  
+   These results confirm that raw frequency signals offer minimal personalisation.
+
+2. Classical collaborative filtering  
+   • SVD – nDCG 0.123  
+   • ItemKNN – nDCG 0.189 after 550 min brute‑force similarity computation.  
+   • Content‑based ItemKNN (CB‑ItemKNN) using track metadata – nDCG 0.010 and was therefore discarded(most-likely implementation error).
+
+3. Neural collaborative filtering (NCF)  
+   A three‑layer embedding‑MLP with grid‑searched depths, ReLU and dropout. nDCG fluctuated between 0.002 – 0.004, indicating severe over‑fitting on the sparse matrix.
+
+4. Bayesian Personalised Ranking – Matrix Factorisation (BPR‑MF)  
+   Poor NCF generalisation motivated a switch to pair‑wise MF. A complete 168‑run grid was executed:  
+   • latent factors ∈ {32, 64, 128, 256, 384, 512}  
+   • learning rate ∈ {1e‑4, 1e‑3, 1e‑2, 0.03, 0.05, 0.07, 0.1}  
+   • ℓ2‑regularisation ∈ {1e‑4, 1e‑3, 1e‑2, 1e‑1}  
+   Each configuration trained 25 min. The optimum (256 factors, lr 0.03, λ 0.01) scores nDCG ≈ 0.207 validation, beating ItemKNN.
+
+Discussion
+Demographic segmentation yielded negligible lift, underscoring high intra‑segment taste variance. ItemKNN leveraged rich neighbourhood signals but at steep preprocessing cost. CB‑ItemKNN’s failure suggests that metadata alone cannot capture latent taste or there was implementation error. NCF instability shows deeper networks require auxiliary regularisation or context. BPR‑MF offered the best accuracy‑to‑cost ratio and was chosen for final submission.
